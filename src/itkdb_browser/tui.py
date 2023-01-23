@@ -64,7 +64,7 @@ class LoginScreen(Screen):
         yield Footer()
         yield Container(
             Horizontal(
-                Static("Access Code 1", classes="labels"),
+                Static("Access Code eins", classes="labels"),
                 Input(
                     self.access_code1,
                     placeholder="code",
@@ -74,7 +74,7 @@ class LoginScreen(Screen):
                 classes="input_row",
             ),
             Horizontal(
-                Static("Access Code 2", classes="labels"),
+                Static("Access Code zwei", classes="labels"),
                 Input(
                     self.access_code2,
                     placeholder="code",
@@ -88,7 +88,9 @@ class LoginScreen(Screen):
         )
         yield Horizontal(TextLog(), id="textlog")
 
-
+#####################
+### institutions
+#####################
 class InstitutionItem(ListItem):
     """An Institution ListItem."""
 
@@ -112,7 +114,6 @@ class InstitutionList(ListView):
         ):
             self.append(InstitutionItem(institution))
 
-
 class InstitutionDisplay(Static):
     """A widget to display institution details."""
 
@@ -122,7 +123,44 @@ class InstitutionDisplay(Static):
         """Called when the institution attribute changes."""
         self.update(Pretty(self.institution))
 
+#####################
+### projects
+#####################
+class ProjectItem(ListItem):
+    """An Project ListItem."""
 
+    __slots__ = ("value",)
+
+    def __init__(self, project: dict[str, Any]):
+        super().__init__(Label(project["name"]))
+        self.value = project
+
+
+class ProjectList(ListView):
+    """A widget to display a list of projects."""
+
+    def load_projects(self) -> None:
+        """Load up the c in the list view."""
+        self.clear()
+        projects = self.app.client.get("listProjects")  # type: ignore[attr-defined]
+        for project in sorted(
+            list(projects),
+            key=itemgetter("name"),
+        ):
+            self.append(ProjectItem(project))
+
+class ProjectDisplay(Static):
+    """A widget to display project details."""
+
+    project: reactive[dict[str, Any]] = reactive({})
+
+    def watch_project(self) -> None:
+        """Called when the project attribute changes."""
+        self.update(Pretty(self.project))
+
+#####################
+### main
+#####################
 class Browser(App[Any]):
     """A basic implementation of the itkdb-browser TUI"""
 
@@ -134,8 +172,10 @@ class Browser(App[Any]):
 
     def __init__(self) -> None:
         super().__init__()
-        self.institution_list = InstitutionList(classes="column")
-        self.institution_details = InstitutionDisplay()
+        self.project_list = ProjectList(classes="column")
+        self.project_details = ProjectDisplay()
+        # self.institution_list = InstitutionList(classes="column")
+        # self.institution_details = InstitutionDisplay()
         self.client = None
 
     def action_toggle_dark(self) -> None:
@@ -148,12 +188,14 @@ class Browser(App[Any]):
 
     def on_list_view_selected(self, message: ListView.Selected) -> None:
         """When institution has been chosen."""
-        self.institution_details.institution = getattr(message.item, "value", {})
+        self.project_details.project = getattr(message.item, "value", {})
+        # self.institution_details.institution = getattr(message.item, "value", {})
 
     def login(self) -> None:
         """Called when the LoginScreen has logged in."""
         self.pop_screen()
-        self.institution_list.load_institutions()
+        self.project_list.load_projects()
+        # self.institution_list.load_institutions()
 
     def on_mount(self) -> None:
         """Call after entering application mode."""
@@ -164,5 +206,6 @@ class Browser(App[Any]):
         yield Header()
         yield Footer()
         yield Horizontal(
-            self.institution_list, Vertical(self.institution_details, classes="column")
+            self.project_list, Vertical(self.project_details, classes="column")
+            # self.institution_list, Vertical(self.institution_details, classes="column")
         )
