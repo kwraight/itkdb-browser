@@ -21,9 +21,9 @@ def main(
         typer.echo(f"itkdb-browser v{__version__}")
         raise typer.Exit()
 
-    import itkdb_browser.tui  # pylint: disable=import-outside-toplevel
+    import itkdb_browser.tui_toggle  # pylint: disable=import-outside-toplevel
 
-    browser = itkdb_browser.tui.Browser()
+    browser = itkdb_browser.tui_toggle.Browser()
     browser.run()
 
 
