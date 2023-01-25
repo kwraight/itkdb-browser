@@ -56,3 +56,22 @@ LoginScreen #textlog {
 LoginScreen TextLog {
   color: $text;
 }
+
+MainScreen {
+  layout: grid;
+  grid-size: 3;
+  grid-rows: 14;
+  grid-gutter: 1;
+}
+
+MainScreen UserDetails {
+  border: solid white;
+  padding: 0 0 0 2;
+  background: $panel;
+}
+
+MainScreen UserInstitutionDetails {
+  border: solid red;
+  padding: 0 0 0 2;
+  background: $panel;
+}
